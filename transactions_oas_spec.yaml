@@ -1,0 +1,542 @@
+openapi: 3.0.0
+info:
+  title: Transaction Details
+  version: 3.0.0
+servers:
+  - url: https://openbanking-uat.jpmorgan.com/tsapi/v3
+    description: OAuth - UAT
+  - url: https://apigatewayqaf.jpmorgan.com/tsapi/v3
+    description: SSL Certificates - UAT
+  - url: https://openbanking.jpmorgan.com/tsapi/v3
+    description: OAuth - Prod
+  - url: https://apigateway.jpmorgan.com/tsapi/v3
+    description: SSL Certificates - Prod
+tags:
+  - name: Retrieve transaction details
+    description: API to retrieve transaction details
+paths:
+  /transactions:
+    get:
+      description: Transaction Details API
+      summary: Retrieve transaction details
+      tags:
+        - Retrieve transaction details
+      parameters:
+        - name: accountIds
+          in: query
+          description: >-
+            Array of account number(s) you wish to retrieve the transaction
+            details for. If no acccountIds are provided, defaults to all
+            onboarded accounts.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: relativeDateType
+          in: query
+          description: >-
+            Optionally used to specify the relative date type for which the
+            transactions will be retrieved. Valid values are: 'CURRENT_DAY' and
+            'PRIOR_DAY'. If no dates are provided, defaults to current day.
+          required: false
+          schema:
+            type: string
+            enum:
+              - CURRENT_DAY
+              - PRIOR_DAY
+        - name: startDate
+          in: query
+          description: >-
+            Optionally used to specify the start date of the date range for
+            which the transactions will be retrieved. If no dates are provided,
+            defaults to current day.
+          required: false
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: >-
+            Optionally used to specify the end date of the date range for which
+            the transactions will be retrieved. If no dates are provided,
+            defaults to current day.
+          required: false
+          schema:
+            type: string
+        - name: lockbox information
+          in: query
+          description: Optionally used to retrieve lockbox details for credited accounts.
+          required: false
+          schema:
+            type: boolean
+        - name: pageNumber
+          in: query
+          description: >-
+            Optionally used to specify the exact page number for retrieving
+            transactions
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        '400':
+          description: |-
+            Bad Request. GCA-006: End Date can not be less then the Start Date
+             GCA-018: Invalid parameter combination; startDate + relativeDateType
+             GCA-019: Invalid parameter combination; endDate + relativeDateType
+             GCA-020: relativeDateType value is invalid. Valid values are CURRENT_DAY,PRIOR_DAY
+             GCA-026: Date format is invalid; please use yyyy-MM-DD
+             GCA-065: Date range can not exceed 5 days
+             GCA-106: lockbox must be true or false
+             GCA-107: Date format is invalid; please use yyyy-MM-ddTHH:mm:ss.SSSSSS.
+             GCA-132: pageNumber value should be greater than 0
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/error'
+        '403':
+          description: |-
+            Forbidden. GCA-001: Client is not eligible for the API Service
+             GCA-003: Client is not eligible for the API Service
+             GCA-022: No eligible accounts were found
+             GCA-009: The requested accounts were not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/error'
+        '503':
+          description: 'Service Unavailable.  GCA-099: System is unavailable.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/error'
+      x-examples:
+        - name: Example 1 - query by all parameters
+          description: >-
+            Example 1 - use all parameters to get by specific information about
+            Virtual Account Balance
+          parameters:
+            accountIds:
+              - '1760'
+            relativeDateType: CURRENT_DAY
+            startDate: '2018-09-01'
+            endDate: '2018-09-03'
+            lockbox information: 'true'
+components:
+  schemas:
+    response:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/pagination'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/transaction'
+    pagination:
+      type: object
+      properties:
+        pageSize:
+          type: number
+          example: 3
+        totalPages:
+          type: number
+          example: 3
+        pageNumber:
+          type: number
+          example: 1
+        totalRecords:
+          type: number
+          example: 30
+    transaction:
+      type: object
+      properties:
+        account:
+          type: object
+          properties:
+            accountId:
+              type: string
+            accountName:
+              type: string
+            bankId:
+              type: string
+              description: >-
+                routing transit number in the US or the swift bank outside the
+                US or multibank information if a non JPM bank
+            branchId:
+              type: string
+            bankName:
+              type: string
+            currency:
+              type: object
+              properties:
+                code:
+                  type: string
+                description:
+                  type: string
+            aba:
+              type: string
+            swift:
+              type: string
+        asOfDateTime:
+          type: string
+          description: Timestamp of when the system was NOTIFIED about the transaction
+        valueDateTime:
+          type: string
+          description: Timestamp of when the funds are AVAILABLE for the client
+        asOfDate:
+          type: string
+          description: Date of when the system was NOTIFIED about the transaction
+        valueDate:
+          type: string
+          description: Date of when the funds are AVAILABLE for the client
+        debitCreditCode:
+          type: string
+          description: If the transaction is a Debit or a Credit to the account
+        baiType:
+          type: object
+          description: if it is a wire, ach etc
+          properties:
+            typeCode:
+              type: string
+            description:
+              type: string
+            btrsTypeCode:
+              type: string
+        fundsTypeCode:
+          type: string
+          enum:
+            - S
+            - V
+            - Z
+            - 0
+            - 1
+            - 2
+          description: >-
+            whether it is a float transaction or not. S means same day, V means
+            variable, Z means unknown, 0 means same day, 1 day means next day, 2
+            means 2 days from now
+        currency:
+          type: object
+          properties:
+            code:
+              type: string
+        amount:
+          type: number
+          example: 10
+        immediateAvailable:
+          type: number
+          example: 10
+        day1Available:
+          type: number
+          example: 10
+        day2Available:
+          type: number
+          example: 10
+        day2PlusAvailable:
+          type: number
+          description: plus means that additional money will be coming in at a future date
+          example: 10
+        day3PlusAvailable:
+          type: number
+          example: 10
+        bankReferenceSearchable:
+          type: object
+          properties:
+            standardValue:
+              type: string
+              description: >-
+                JPMC assigned transaction reference number, unique when used
+                with the bank ID and asOfDateTime
+        customerReferenceSearchable:
+          type: object
+          properties:
+            standardValue:
+              type: string
+              description: >-
+                customer reference number (client based info) ie for a check it
+                will be the check number
+        repairCode:
+          type: string
+        reversal:
+          type: string
+        wireType:
+          type: string
+        shortDescription:
+          type: string
+        postCode:
+          type: string
+        checkNumber:
+          type: number
+          description: same as the above the client check number (we dont need ths)
+          example: 10
+        lockbox:
+          type: object
+          $ref: '#/components/schemas/lockbox'
+        lockboxInformation:
+          type: object
+          $ref: '#/components/schemas/lockboxInformation'
+        narrativeText:
+          type: object
+          description: >-
+            Narrative text tag carries VRN information, the VRN is shown after
+            the tag "VXR"
+          properties: {}
+        sepaDetailsXml:
+          type: string
+          description: entire sepa details
+        supplementalTextSet:
+          type: object
+          properties: {}
+          description: narrative text in another language
+        supplementalTextRecordList:
+          type: array
+          description: narrative text in another language
+          items: {}
+        supplementalText:
+          type: string
+          description: narrative text in another language
+        achBatchItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AchBatchWithItems'
+          description: number of items in the ach batch
+        addenda:
+          type: string
+        transactionId:
+          type: string
+          description: >-
+            Used to uniquely identify the transaction across time ONLY among all
+            Current Day transactions and among all Historical transactions
+            SEPARATELY. Cannot be used to uniquely identify a transaction in the
+            Current Day, and then identify that same transaction days later
+            after the transaction has been hard-posted. However, among all
+            Current Day transactions this will be unique, and separately among
+            all historical transactions this will be unique.
+    error:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        errorMsg:
+          type: string
+    BaiType:
+      type: object
+      properties:
+        btrsTypeCode:
+          type: string
+        description:
+          type: string
+        germanTypeCode:
+          type: string
+        groupCode:
+          type: string
+        groupDescription:
+          type: string
+        productGroupCode:
+          type: string
+        shortDescription:
+          type: string
+        summaryTypeCode:
+          type: string
+        swiftTypeCode:
+          type: string
+        typeCode:
+          type: string
+      title: BaiType
+    AchAddenda:
+      type: object
+      properties:
+        achBatchNumber:
+          type: integer
+          format: int32
+        addendaRecordSequenceNumber:
+          type: integer
+          format: int32
+        addendaTextRecord:
+          type: string
+        loadEventSequenceNumber:
+          type: integer
+          format: int32
+      title: AchAddenda
+    AchBatchWithItems:
+      type: object
+      properties:
+        achCompanyDescription:
+          type: string
+        achCompanyId:
+          type: string
+        achCompanyName:
+          type: string
+        achLdEvtSeqNo:
+          type: integer
+          format: int32
+        batchCreditAmount:
+          type: number
+        batchDebitAmount:
+          type: number
+        batchItemCount:
+          type: integer
+          format: int32
+        batchItemSeqNo:
+          type: integer
+          format: int32
+        batchNetAmount:
+          type: number
+        debitCreditCode:
+          type: string
+        entryDate:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: '#/definitions/AchIndividualItem'
+        originatorBatchSequenceNumber:
+          type: string
+        standardEntryClass:
+          type: string
+      title: AchBatchWithItems
+    AchIndividualItem:
+      type: object
+      properties:
+        achAddendaList:
+          type: array
+          items:
+            $ref: '#/definitions/AchAddenda'
+        baiTypeCode:
+          $ref: '#/definitions/BaiType'
+        clientOriginatingTraceNumber:
+          type: string
+        debitCreditCode:
+          type: string
+        dfiAccountId:
+          type: string
+        dfiBankId:
+          type: string
+        individualId:
+          type: string
+        individualName:
+          type: string
+        itemAmount:
+          type: number
+        itemBatchSequence:
+          type: integer
+          format: int32
+        itemDrCrCd:
+          type: string
+        itemEventSequence:
+          type: integer
+          format: int32
+      title: AchIndividualItem
+    lockbox:
+      type: object
+      properties:
+        lockboxSequenceCode:
+          type: string
+          example: '23424'
+        lockboxItems:
+          type: number
+          example: 5
+        lockboxNumber:
+          type: string
+          example: '112245'
+        lockboxDepositDate:
+          type: string
+          example: '2021-01-10'
+        lockboxDepositTime:
+          type: string
+      required:
+        - lockboxSequenceCode
+    lockboxInformation:
+      type: object
+      properties:
+        number:
+          type: number
+          example: 51
+        siteName:
+          type: string
+        remitter:
+          type: object
+          properties:
+            batchNumber:
+              type: number
+              example: 10
+            batchItemCount:
+              type: number
+              example: 10
+            batchAmount:
+              type: string
+            debitCreditCode:
+              type: string
+            entryDate:
+              type: string
+            creditDate:
+              type: string
+            depositDate:
+              type: string
+            depositTime:
+              type: string
+            transactionDescriptionType:
+              type: string
+              description: >-
+                transaction type can be, LBX, ACH, WIRE, PCX, BRANCH, ANY, MISC,
+                VRD, VRM
+            ddaNumber:
+              type: number
+              example: 10
+            lockboxPaymentDetail:
+              type: object
+              properties:
+                itemNumber:
+                  type: number
+                  example: 10
+                remitterBank:
+                  type: string
+                checkNumber:
+                  type: string
+                routingNumber:
+                  type: string
+                itemAmount:
+                  type: number
+                  example: 10
+                remitterName:
+                  type: string
+                transactionId:
+                  type: number
+                  example: 10
+                paymentSequenceNumber:
+                  type: number
+                invoiceDetail:
+                  type: object
+                  properties:
+                    invoiceNumber:
+                      type: number
+                      example: 10
+                    invoiceAmount:
+                      type: number
+                      example: 10
+                    invoiceDate:
+                      type: string
+                    invoiceRefNumber:
+                      type: string

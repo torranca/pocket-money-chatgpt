@@ -1,0 +1,33 @@
+/* App.css */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  background-color: #CD2AB5; /* Set the background color to bright pink */
+  color: #fff;
+  padding: 20px;
+  width: 100%;
+}
+
+.navbar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar ul li {
+  margin-bottom: 10px;
+}
+
+.navbar ul li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.main {
+  flex-grow: 1;
+  padding: 20px;
+}

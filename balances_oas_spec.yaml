@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: Treasury Services - Account Balances API
+  description: Treasury Services - Account Balances API
+  version: 1.0.1
+tags:
+  - name: Balances
+    description: Balances
+    externalDocs:
+      url: https://developer.jpmorgan.com/?id=tsapi_account
+paths:
+  /balance:
+    post:
+      summary: Account Balances
+      description: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request'
+        required: false
+      x-examples:
+        - name: Example 1 - Query by Date Range
+          description: Example 1 - Query by Date Range
+          parameters:
+            body:
+              startDate: '2018-01-01'
+              endDate: '2018-01-05'
+              accountList:
+                - accountId: '00000000000000304266256'
+        - name: Example 2 - Query by Date Range (Multiple Accounts)
+          description: Example 2 - Query by Date Range (Multiple Accounts)
+          parameters:
+            body:
+              startDate: '2018-01-01'
+              endDate: '2018-01-05'
+              accountList:
+                - accountId: 00000000000000304266256,00000000000000010962009
+        - name: Example 3 - Query by Relative Date (Current Day)
+          description: Example 3 - Query by Relative Date (Current Day)
+          parameters:
+            body:
+              relativeDateType: CURRENT_DAY
+              accountList:
+                - accountId: '00000000000000304266256'
+        - name: Example 4 - Query by Relative Date (Prior Day)
+          description: Example 4 - Query by Relative Date (Prior Day)
+          parameters:
+            body:
+              relativeDateType: PRIOR_DAY
+              accountList:
+                - accountId: '00000000000000304266256'
+      tags:
+        - Balances
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/response'
+        200 Errors:
+          description: >-
+            GCA-001    Unauthorized Access  
+
+            GCA-003    Unauthorized Access  
+
+            GCA-099    System is Unavailable  
+
+            GCA-023    Please re-send request in valid format  
+
+            GCA-020    relativeDateType value is invalid. Valid values are
+            'CURRENT_DAY','PRIOR_DAY'  
+
+            GCA-018    Invalid parameter combination; startDate +
+            relativeDateType  
+
+            GCA-019    Invalid parameter combination; endDate +
+            relativeDateType  
+
+            GCA-021    Account ID is required  
+
+            GCA-025    No transactions were found for this account in the
+            requested date range
+
+            GCA-026    Date format is invalid; please use 'yyyy-MM-dd'  
+
+            GCA-005    Date range cannot exceed 31 days  
+
+            GCA-006    End Date cannot be less than the Start Date  
+
+            GCA-022    No eligible accounts were found  
+
+            GCA-068    Access Denied to all accounts: Not entitled to the
+            required countries via the Preta Registry Role  
+
+            GCA-076    Access Denied: Not entitled to required country via Preta
+            Registry Role  
+
+            GCA-010    The account was not found.  
+
+            GCA-009    The requested accounts were not found
+
+            GCA-024    No transaction was found for this transaction on the
+            requested day.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Error'
+servers:
+  - url: https://openbankinguat.jpmorgan.com/accessapi
+    description: OAuth - UAT
+  - url: https://openbanking.jpmorgan.com/accessapi
+    description: OAuth - PROD
+  - url: https://apigatewayqaf.jpmorgan.com/accessapi
+    description: SSL Certificates - UAT
+  - url: https://apigateway.jpmorgan.com/accessapi
+    description: SSL Certificates - PROD
+components:
+  schemas:
+    request:
+      type: object
+      properties:
+        startDate:
+          type: string
+          example: '2019-02-14'
+          description: ''
+        endDate:
+          type: string
+          example: '2019-02-17'
+          description: ''
+        relativeDateType:
+          type: string
+          example: CURRENT_DAY
+          enum:
+            - CURRENT_DAY
+            - PRIOR_DAY
+          description: ''
+        accountList:
+          type: array
+          items:
+            $ref: '#/components/schemas/accountList'
+    response:
+      properties:
+        accountList:
+          type: array
+          items:
+            type: object
+            required: []
+            properties:
+              accountId:
+                type: string
+              accountName:
+                type: string
+              branchId:
+                type: string
+              bankId:
+                type: string
+              bankName:
+                type: string
+              currency:
+                type: object
+                required: []
+                properties:
+                  code:
+                    type: string
+                  currencySequence:
+                    type: number
+                  decimalLocation:
+                    type: number
+                  description:
+                    type: string
+              balanceList:
+                type: array
+                items:
+                  type: object
+                  required: []
+                  properties:
+                    asOfDate:
+                      type: string
+                      description: >-
+                        Timestamp of when the system was NOTIFIED about the
+                        transaction
+                    recordTimestamp:
+                      type: string
+                    currentDay:
+                      type: boolean
+                    openingAvailableAmount:
+                      type: number
+                    openingLedgerAmount:
+                      type: number
+                    endingAvailableAmount:
+                      type: number
+                    endingLedgerAmount:
+                      type: number
+    accountList:
+      type: object
+      properties:
+        accountId:
+          type: string
+          example: '00000000000000304266256'
+          description: ''
+    Error:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required: []
+            properties:
+              errorCode:
+                type: string
+              errorMsg:
+                type: string

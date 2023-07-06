@@ -1,0 +1,2827 @@
+openapi: 3.0.0
+servers:
+  - url: https://apigatewaycat.jpmorgan.com/tsapi/v1
+    description: UAT/CAT
+  - url: https://apigateway.jpmorgan.com/tsapi/v1
+    description: PROD
+  - url: https://api-mtls-pci-uat.jpmorgan.com/tsapi/v1
+    description: PCI UAT/CAT - Domain to be used for Push To Card payments only
+  - url: https://api-mtls.merchant.jpmorgan.com/tsapi/v1
+    description: PCI PROD - Domain to be used for Push To Card payments only
+info:
+  title: Global Payments
+  version: 1.1.0
+tags:
+  - name: Payment Initiation
+    description: API to initiate a payment
+  - name: Payment Information Retrieval
+    description: APIs to retrieve status and details of a payment
+paths:
+  /payments:
+    post:
+      summary: Payments Initiation API
+      description: "This API can be used to initiate payments. The following rails are supported:\n\nReal time Payments :- \n\n\n          Singapore \n          Australia\n          United Kingdom\n          Hong Kong\n          Malaysia\n          SEPA\n          Brazil\n          United States\n          Mexico\n          Indonesia\n\n\nAlternate Payments:\n\n    Push To Card :-\n\n          United States\n          Canada\n\n\nACH Payments:\n\n          Chile\n          \n\nBlockchain Payments:\n  \n    JPM Coin :- \n    \n      \tUnited States\n      \tSingapore\n      \tHong Kong \n      \tLuxembourg\n      \tLondon \n      \tFrankfurt \n            \t\n\n\n      \n          \n           \n\n\nReferences made to other markets/instruments in the specification are for internal development purposes only."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payments'
+        required: true
+      callbacks:
+        paymentInitiationStatus:
+          '{client-url}/status':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        callbacks:
+                          $ref: '#/components/schemas/callbacks'
+                required: true
+      x-examples:
+        - name: Payment Initiation - UK FPS
+          description: Initiate a UK faster payment
+          parameters:
+            body:
+              payments:
+                possibleDuplicateMessage: false
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2021-09-22'
+                transferType: CREDIT
+                paymentCurrency: GBP
+                paymentAmount: 0.1
+                paymentType: RTP
+                debtor:
+                  debtorAccount:
+                    accountId: '12345678'
+                    accountCurrency: GBP
+                    accountType: DDA
+                  ultimateDebtor:
+                    ultimateDebtorName: Liverpool Football Club
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: Lennon Road
+                      buildingNumber: 2A
+                      postalCode: LFC06
+                      townName: Liverpool
+                      country: GB
+                      countrySubDvsn: Liverpool
+                    countryOfResidence: GB
+                    organizationId:
+                      bic: CHASGB2L
+                      id: '40025916'
+                      schemeName:
+                        code: DDA
+                      issuer: Mr. Issuer
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASGB2L
+                creditorAgent:
+                  financialInstitutionId:
+                    clearingSystemId:
+                      id: '185008'
+                creditor:
+                  creditorName: Southampton Football Club
+                  postalAddress:
+                    addressType: ADDR
+                    streetName: Fratton Park
+                    buildingNumber: 2A
+                    postalCode: PO48RA
+                    townName: Portsmouth
+                    country: GB
+                    countrySubDvsn: Hampshire
+                  countryOfResidence: GB
+                  creditorAccount:
+                    accountId: '87654321'
+                  ultimateCreditor:
+                    ultimateCreditorName: Portsmouth Football Club
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: Fratton Park
+                      buildingNumber: 2A
+                      postalCode: PO48RA
+                      townName: Portsmouth
+                      country: GB
+                      countrySubDvsn: Hampshire
+                purpose:
+                  code: GDDS
+                  type: CODE
+                remittanceInformation:
+                  unstructuredInformation:
+                    - 'Player Transfer INVOICE: 2020-078-07-0000'
+        - name: Payment Initiation - Singapore RTP
+          description: Initiate a Singapore faster payment
+          parameters:
+            body:
+              payments:
+                possibleDuplicateMessage: false
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2021-08-03'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: SGD
+                paymentAmount: 1.01
+                debtor:
+                  debtorAccount:
+                    accountId: '888000000'
+                    accountCurrency: SGD
+                    accountType: DDA
+                  ultimateDebtor:
+                    ultimateDebtorName: SG IRCT P2A Ultimate Debtor
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: UDebtor streetName
+                      buildingNumber: buildingNumber
+                      postalCode: UD123456
+                      townName: UDtownName
+                      country: SG
+                      countrySubDvsn: Udebtor countrySubDvsn
+                      addressLine:
+                        - address line1
+                        - address line2
+                        - address line3
+                        - address line4
+                    dateAndPlaceOfBirth:
+                      birthDate: '2021-01-01'
+                      cityOfBirth: R city
+                      countryOfBirth: SG
+                    countryOfResidence: SG
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASSGSG
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: OCBCSGSG
+                creditor:
+                  creditorName: SG IRCT P2A Creditor Name
+                  postalAddress:
+                    addressType: ADDR
+                    streetName: Receiver streetName
+                    buildingNumber: buildingNumber
+                    postalCode: R123456
+                    townName: RtownName
+                    country: SG
+                    countrySubDvsn: Receiver countrySubDvsn
+                    addressLine:
+                      - creditor adrLine1
+                      - address line2
+                      - address line3
+                      - address line4
+                  dateAndPlaceOfBirth:
+                    birthDate: '2021-01-01'
+                    cityOfBirth: R city
+                    countryOfBirth: SG
+                  countryOfResidence: SG
+                  creditorAccount:
+                    accountId: '999000000'
+                  ultimateCreditor:
+                    ultimateCreditorName: SG IRCT P2A Ultimate Creditor
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: UCreditor streetName
+                      buildingNumber: buildingNumber
+                      postalCode: UC123456
+                      townName: UCtownName
+                      country: SG
+                      countrySubDvsn: Ucreditor countrySubDvsn
+                      addressLine:
+                        - address line1
+                        - address line2
+                        - address line3
+                        - address line4
+                    dateAndPlaceOfBirth:
+                      birthDate: '2021-01-01'
+                      cityOfBirth: R city
+                      countryOfBirth: SG
+                    countryOfResidence: SG
+                purpose:
+                  code: GDDS
+                  type: CODE
+                remittanceInformation:
+                  unstructuredInformation:
+                    - 'FOR INVOICE: 2020-078-07-00001'
+        - name: Payment Initiation - Australia FPS
+          description: Initiate an Australia faster payment
+          parameters:
+            body:
+              payments:
+                possibleDuplicateMessage: false
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2021-08-02'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: AUD
+                paymentAmount: 1.01
+                debtor:
+                  debtorAccount:
+                    accountId: '111000000'
+                    accountCurrency: AUD
+                    accountType: DDA
+                  ultimateDebtor:
+                    ultimateDebtorName: AU IRCT P2A Ultimate Debtor
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: UDebtor streetName
+                      buildingNumber: buildingNumber
+                      postalCode: UD123456
+                      townName: UDtownName
+                      country: AU
+                      countrySubDvsn: Udebtor countrySubDvsn
+                      addressLine:
+                        - address line1
+                        - address line2
+                        - address line3
+                        - address line4
+                    dateAndPlaceOfBirth:
+                      birthDate: '2021-01-01'
+                      cityOfBirth: R city
+                      countryOfBirth: AU
+                    countryOfResidence: AU
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASAU2X
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: BOFAAUSX
+                    clearingSystemId:
+                      id: '123456'
+                creditor:
+                  creditorName: AU IRCT P2A Creditor Name
+                  postalAddress:
+                    addressType: ADDR
+                    streetName: Receiver streetName
+                    buildingNumber: buildingNumber
+                    postalCode: R123456
+                    townName: RtownName
+                    country: AU
+                    countrySubDvsn: Receiver countrySubDvsn
+                    addressLine:
+                      - creditor adrLine1
+                      - address line2
+                      - address line3
+                      - address line4
+                  dateAndPlaceOfBirth:
+                    birthDate: '2021-01-01'
+                    cityOfBirth: R city
+                    countryOfBirth: AU
+                  countryOfResidence: AU
+                  creditorAccount:
+                    accountId: '111000000'
+                  ultimateCreditor:
+                    ultimateCreditorName: AU IRCT P2A Ultimate Creditor
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: UCreditor streetName
+                      buildingNumber: buildingNumber
+                      postalCode: UC123456
+                      townName: UCtownName
+                      country: AU
+                      countrySubDvsn: Ucreditor countrySubDvsn
+                      addressLine:
+                        - address line1
+                        - address line2
+                        - address line3
+                        - address line4
+                    dateAndPlaceOfBirth:
+                      birthDate: '2021-01-01'
+                      cityOfBirth: R city
+                      countryOfBirth: AU
+                    countryOfResidence: AU
+                    organizationId:
+                      id: '111940881'
+                      schemeName:
+                        proprietary: CLIENT_ID
+                purpose:
+                  code: GDDS
+                  type: CODE
+                categoryPurpose:
+                  proprietary: PENS
+                remittanceInformation:
+                  unstructuredInformation:
+                    - 'FOR INVOICE: 2020-078-07-00001'
+                    - 'FOR INVOICE: 2020-078-07-00002'
+        - name: Payment Initiation - Hong Kong FPS
+          description: Payout to a Hong Kong beneficiary
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2022-06-01'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: HKD
+                paymentAmount: 1.03
+                debtor:
+                  debtorAccount:
+                    accountId: '6700000001'
+                    accountCurrency: HKD
+                  ultimateDebtor:
+                    ultimateDebtorName: Hong Kong Subsidiary Limited
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: Central Street
+                      buildingNumber: 01, 1/F
+                      postalCode: '999077'
+                      townName: Central
+                      country: HK
+                      countrySubDvsn: Central
+                      addressLine:
+                        - address line1
+                        - address line2
+                        - address line3
+                        - address line4
+                    dateAndPlaceOfBirth:
+                      birthDate: '1950-12-31'
+                      cityOfBirth: Hong Kong
+                      countryOfBirth: HK
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASHKHH
+                creditorAgent:
+                  financialInstitutionId:
+                    clearingSystemId:
+                      id: '004'
+                creditor:
+                  creditorName: Public Inc.
+                  postalAddress:
+                    addressType: ADDR
+                    streetName: Connaught Road
+                    buildingNumber: 02, 2/F
+                    postalCode: '999077'
+                    townName: Wan Chai
+                    country: HK
+                    countrySubDvsn: Wan Chai
+                    addressLine:
+                      - creditor adrLine1
+                      - address line2
+                      - address line3
+                      - address line4
+                  dateAndPlaceOfBirth:
+                    birthDate: '1980-10-20'
+                    cityOfBirth: Hong Kong
+                    countryOfBirth: HK
+                  creditorAccount:
+                    accountId: '1234567890'
+                    accountType: BBAN
+                  ultimateCreditor:
+                    ultimateCreditorName: John Smith
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: Connaught Road
+                      buildingNumber: 02, 2/F
+                      postalCode: '999077'
+                      townName: Wan Chai
+                      country: HK
+                      countrySubDvsn: Wan Chai
+                      addressLine:
+                        - address line1
+                        - address line2
+                        - address line3
+                        - address line4
+                    dateAndPlaceOfBirth:
+                      birthDate: '1960-05-15'
+                      cityOfBirth: Hong Kong
+                      countryOfBirth: HK
+                categoryPurpose:
+                  proprietary: CXBSNS
+                remittanceInformation:
+                  unstructuredInformation:
+                    - >-
+                      Invoice number 11. Paid by HK Ltd B/O HK Sub Ltd. Pay to
+                      Public Inc for John Smith
+        - name: Payment Initiation - Malaysia FPS
+          description: Initiate a Malaysia faster payment
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: MYR
+                paymentAmount: 1
+                debtor:
+                  debtorDevice:
+                    ipAddress: 123.45.67.890
+                  debtorAccount:
+                    accountId: '0987654321'
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASMYKX
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: CITIMYKL
+                creditor:
+                  creditorName: ABC
+                  countryOfResidence: MY
+                  creditorAccount:
+                    accountId: '987654321'
+                    accountType: SVGS
+                purpose:
+                  code: '17080'
+                  type: PROPRIETARY
+                remittanceInformation:
+                  structuredInformation:
+                    - creditReference: credit-reference-1
+        - name: Payment Initiation - SEPA Instant
+          description: Initiate a SEPA Instant payment
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2022-07-06'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: EUR
+                paymentAmount: 0.01
+                debtor:
+                  debtorAccount:
+                    accountId: DE40501108006169009120
+                    accountCurrency: EUR
+                  ultimateDebtor:
+                    ultimateDebtorName: Clint Hall
+                    postalAddress:
+                      addressType: ADDR
+                      country: DE
+                      addressLine:
+                        - address line1
+                        - address line2
+                    organizationId:
+                      bic: CHASDEFX
+                      id: DE88501108006231400596
+                      schemeName:
+                        code: IBAN
+                      issuer: Mr. Issuer
+                    dateAndPlaceOfBirth:
+                      birthDate: '2001-01-01'
+                      cityOfBirth: Luxembourg
+                      countryOfBirth: DE
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASDEFX
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: CHASDEFX
+                creditor:
+                  creditorName: Ross Hall
+                  countryOfResidence: DE
+                  postalAddress:
+                    addressType: ADDR
+                    country: DE
+                    addressLine:
+                      - address line1
+                      - address line2
+                  dateAndPlaceOfBirth:
+                    birthDate: '2021-01-01'
+                    cityOfBirth: Luxembourg
+                    countryOfBirth: DE
+                  creditorAccount:
+                    accountId: DE39501108006169009138
+                    accountType: IBAN
+                  ultimateCreditor:
+                    ultimateCreditorName: FD Ltd.
+                    postalAddress:
+                      addressType: ADDR
+                      country: DE
+                      addressLine:
+                        - address line1
+                        - address line2
+                    dateAndPlaceOfBirth:
+                      birthDate: '2021-01-01'
+                      cityOfBirth: Luxembourg
+                      countryOfBirth: DE
+                purpose:
+                  code: '1234'
+                  type: PROPRIETARY
+                remittanceInformation:
+                  unstructuredInformation: payment for shipment
+        - name: Payment Initiation - Brazil PIX RTP
+          description: Initiate a Brazilian Real Time Payment
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2021-12-07'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: BRL
+                paymentAmount: 0.98
+                debtor:
+                  debtorAccount:
+                    accountId: '1000304'
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASBRSP
+                creditorAgent:
+                  financialInstitutionId:
+                    clearingSystemId:
+                      id: '33172537'
+                      branchNumber: '1'
+                creditor:
+                  creditorName: Alison Becker
+                  creditorAccount:
+                    accountId: '0012345678'
+                    accountType: CACC
+                taxInformation:
+                  creditorTaxInformation:
+                    taxId: '00044967012'
+                    taxpayerCategory: INDIVIDUAL
+        - name: Payment Initiation - United States RTP
+          description: Payout details
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2022-10-10'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: USD
+                paymentAmount: 2.97
+                categoryPurpose:
+                  proprietary: INDIVIDUAL
+                debtor:
+                  debtorName: Paula Smitty
+                  debtorAccount:
+                    accountId: '000009102574986'
+                    accountType: DDA
+                  ultimateDebtor:
+                    ultimateDebtorName: Christian Jones
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: Hancock Ave
+                      buildingNumber: '121'
+                      postalCode: '07302'
+                      townName: Jersey City
+                      country: US
+                      countrySubDvsn: Hudson
+                    dateAndPlaceOfBirth:
+                      birthDate: '1984-01-01'
+                      cityOfBirth: Hull city
+                      countryOfBirth: BR
+                    individualId:
+                      id: '001'
+                debtorAgent:
+                  financialInstitutionId:
+                    clearingSystemId:
+                      id: '021000021'
+                      idType: USABA
+                creditorAgent:
+                  financialInstitutionId:
+                    clearingSystemId:
+                      id: '071000013'
+                      idType: USABA
+                creditor:
+                  creditorName: Clint Davos
+                  postalAddress:
+                    addressType: ADDR
+                    streetName: Cow Hollow
+                    buildingNumber: '65'
+                    postalCode: '05483'
+                    townName: San Francisco
+                    country: US
+                    countrySubDvsn: SFO
+                  dateAndPlaceOfBirth:
+                    birthDate: '2001-01-12'
+                    cityOfBirth: London
+                    countryOfBirth: UK
+                  creditorAccount:
+                    accountId: '000000034257284'
+                    accountType: ACCT
+                  ultimateCreditor:
+                    ultimateCreditorName: BR IRCT P2A Ultimate Creditor
+                    postalAddress:
+                      addressType: ADDR
+                      streetName: Flint Ave
+                      buildingNumber: '89'
+                      postalCode: '88793'
+                      townName: Los Angeles
+                      country: US
+                      countrySubDvsn: LAX
+                    dateAndPlaceOfBirth:
+                      birthDate: '1999-04-01'
+                      cityOfBirth: Rio
+                      countryOfBirth: BR
+                    organizationId:
+                      id: '003'
+                remittanceInformation:
+                  unstructuredInformation:
+                    - For the good times
+        - name: Payment Initiation - Mexico SPIE
+          description: Payout details
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR20210920231135
+                requestedExecutionDate: '2022-06-30'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: MXN
+                paymentAmount: 1.01
+                debtor:
+                  debtorAccount:
+                    accountId: '0022628001'
+                    accountCurrency: MXN
+                    accountType: DDA
+                  ultimateDebtor:
+                    ultimateDebtorName: Enzo Hernandez
+                    postalAddress:
+                      addressType: ADDR
+                      country: MX
+                      addressLine:
+                        - Papua Lane
+                        - Kew Park
+                    individualId:
+                      id: '002'
+                      issuer: Elicia Carvalho
+                    additionalIdentifiers:
+                      - id: '1234'
+                  dateAndPlaceOfBirth:
+                    birthDate: '2021-01-01'
+                    cityOfBirth: Luxembourg
+                    countryOfBirth: DE
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASMXMX
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: CHASMXMX
+                creditor:
+                  creditorName: '0000'
+                  countryOfResidence: MY
+                  postalAddress:
+                    addressType: ADDR
+                    country: DE
+                    addressLine:
+                      - Texmaco Street
+                      - Dinho River
+                  dateAndPlaceOfBirth:
+                    birthDate: '2021-01-01'
+                    cityOfBirth: Luxembourg
+                    countryOfBirth: DE
+                  creditorAccount:
+                    accountId: '0077644395'
+                    accountType: DDA
+                  ultimateCreditor:
+                    ultimateCreditorName: Prince Gomez
+                    postalAddress:
+                      addressType: ADDR
+                      country: DE
+                      addressLine:
+                        - Calicut Avenue
+                        - Legend's Street
+                    dateAndPlaceOfBirth:
+                      birthDate: '2021-01-01'
+                      cityOfBirth: Luxembourg
+                      countryOfBirth: DE
+                remittanceInformation:
+                  unstructuredInformation:
+                    - Surf board payment
+        - name: Payment Initiation - Indonesia RTP
+          description: Initiate a Real Time Payment in Indonesia
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR20210920231135
+                requestedExecutionDate: '2023-03-20'
+                transferType: CREDIT
+                paymentType: RTP
+                paymentCurrency: IDR
+                paymentAmount: 6500
+                categoryPurpose:
+                  proprietary: INVESTMENT
+                debtor:
+                  debtorName: IDN Debtor Name
+                  debtorAccount:
+                    accountId: '6653331826'
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASIDJX
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: BDINIDJA
+                creditor:
+                  creditorName: Mary Sutantri
+                  creditorAccount:
+                    accountId: '003623339944'
+                remittanceInformation:
+                  unstructuredInformation:
+                    - Outward Pay to account transaction 1
+        - name: Push To Card (P2C)
+          description: Initiate a Push To Card payment
+          parameters:
+            body:
+              payments:
+                possibleDuplicateMessage: false
+                requestedExecutionDate: '2022-06-28'
+                transferType: CREDIT
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                paymentCurrency: USD
+                paymentAmount: 10
+                debtor:
+                  debtorName: US Test Debtor
+                  debtorAccount:
+                    alternateAccountIdentifier: PRU01US
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASUS33
+                creditor:
+                  creditorName: US Test Creditor
+                  creditorAccount:
+                    accountType: CARD
+                    alternateAccountIdentifier: '4137110019999999'
+                    cardExpiryDate: '2207'
+                remittanceInformation:
+                  unstructuredInformation:
+                    - Remit1US
+        - name: ACH - Chile
+          description: Initiate a Chile ACH payment
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2022-08-02'
+                transferType: CREDIT
+                paymentCurrency: CLP
+                paymentAmount: 300.25
+                debtor:
+                  debtorAccount:
+                    accountId: '2600023565'
+                    accountCurrency: CLP
+                  debtorName: Mr. Debtor
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASCLRM
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: BCHICLRM
+                    clearingSystemId:
+                      id: '114740179'
+                      branchNumber: '0001'
+                creditor:
+                  creditorName: Test 17
+                  creditorAccount:
+                    accountId: '101000974'
+                    accountType: SVGS
+                  postalAddress:
+                    country: CL
+                paymentType: ACH.TRF
+                purpose:
+                  code: '0010130000'
+                  type: PROPRIETARY
+                taxInformation:
+                  creditorTaxInformation:
+                    taxId: 06703922-K
+        - name: Blockchain - JPM Coin payments
+          description: Initiate a JPM Coin deposit payment
+          parameters:
+            body:
+              payments:
+                paymentIdentifiers:
+                  endToEndId: XR202109202311354152
+                requestedExecutionDate: '2022-09-01'
+                paymentCurrency: USD
+                paymentAmount: 1.01
+                transferType: CREDIT
+                paymentType: BLOCKCHAIN
+                debtor:
+                  debtorAccount:
+                    accountId: '8830699900'
+                    accountType: DDA
+                debtorAgent:
+                  financialInstitutionId:
+                    bic: CHASSGSG
+                creditorAgent:
+                  financialInstitutionId:
+                    bic: CHASUS33
+                creditor:
+                  creditorAccount:
+                    accountId: '0070103277'
+                    accountType: BDA
+                remittanceInformation:
+                  unstructuredInformation:
+                    - Payment for container shipment
+      responses:
+        '202':
+          description: Payment has been accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/paymentInitiationResponse'
+        '400':
+          description: >-
+
+            Bad Request.
+
+            List of Error codes and Rule definitions. errorDescription is
+            dynamically generated hence not shown here.
+
+
+            10001 - Mandatory field is missing or invalid
+
+            10002 - Minimum length validation failure
+
+            10003 - Maximum length validation failure
+
+            10004 - Date validation failure
+
+            10005 - Amount validation failure ~ value more than maximum
+
+            10006 - Amount validation failure ~ value less than minimum
+
+            10007 - Amount validation failure ~ value is not a number
+
+            10008 - Validation failure ~ unexpected value provided
+
+            10009 - Invalid Id provided
+
+            10010 - Personal information validation failure
+
+            11000 - Clearing/Regulatory failure 
+
+            12000 - System Error
+
+            13000 - Uncategorized Error
+
+
+            **** Standard API Gateway Error codes and descriptions **** 
+
+            GCA-023 - Please re-send request in valid format 
+
+
+            GCA-030 - API Processing Error
+
+            GCA-148 - debtor Account id must be provided 
+
+            GCA-149 - debtorAgent bic or clearingSystemId must be provided 
+
+            GCA-154 - Mandatory field paymentType is invalid or missing 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    $ref: '#/components/schemas/ErrorsInit'
+        '403':
+          description: |-
+            Forbidden. 
+            GCA-001 - Client is not eligible for the API Service
+            GCA-003 - Client is not eligible for the API Service
+            GCA-145 - incorrect originator account id provided
+            GCA-150 - debtor account id/bic was not found 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    $ref: '#/components/schemas/Errors'
+        '503':
+          description: |-
+            Service Unavailable.
+            GCA-099 - System Unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    $ref: '#/components/schemas/Errors'
+      tags:
+        - Payment Initiation
+    get:
+      summary: Retrieve payment details
+      tags:
+        - Payment Information Retrieval
+      description: Retrieve details of your transaction
+      parameters:
+        - name: endToEndId
+          in: query
+          description: >-
+            Customer assigned reference to the transaction. Either endToEndId or
+            firmRootId is required
+          required: false
+          schema:
+            type: string
+        - name: firmRootId
+          in: query
+          description: >-
+            Unique identification, as assigned by the first instructing agent or
+            initiatingParty, to unambiguously identify the transaction that is
+            passed on, unchanged, throughout the entire interbank chain. Either
+            firmRootId or endToEndId is required.
+          required: false
+          schema:
+            type: string
+      x-examples:
+        - name: Payment details retrieval - firmRootId
+          description: Retrieve payment details using firmRootId
+          parameters:
+            firmRootId: 686bdc91-554e-446f-81af-0042f5215535
+        - name: Payment details retrieval - endToEndId
+          description: Retrieve payment details using endToEndId
+          parameters:
+            endToEndId: AXCE12FD43LF111
+      responses:
+        '200':
+          description: >-
+            Response to the details inquiry. In case a payment is rejected, the
+            following errors can be expected.
+
+
+            List of Error codes and Rule definitions. errorDescription is
+            dynamically generated hence not shown here.
+
+
+            10001 - Mandatory field is missing or invalid
+
+            10002 - Minimum length validation failure
+
+            10003 - Maximum length validation failure
+
+            10004 - Date validation failure
+
+            10005 - Amount validation failure ~ value more than maximum
+
+            10006 - Amount validation failure ~ value less than minimum
+
+            10007 - Amount validation failure ~ value is not a number
+
+            10008 - Validation failure ~ unexpected value provided
+
+            10009 - Invalid Id provided
+
+            10010 - Personal information validation failure
+
+            11000 - Clearing/Regulatory failure
+
+            12000 - System Error
+
+            13000 - Uncategorized Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/paymentDetails'
+        '400':
+          description: |-
+            Bad Request
+            GCA-095 - endToEndId or firmRootId is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+        '403':
+          description: |-
+            Forbidden.
+            GCA-001 - Client is not eligible for the API Service
+            GCA-003 - Client is not eligible for the API Service
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+        '503':
+          description: |-
+            Service Unavailable
+            GCA-030 - API Processing Error
+            GCA-099 - System Unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+  /payments/status:
+    get:
+      summary: Retrieve payment status
+      description: Retrieve status of your transaction
+      parameters:
+        - name: endToEndId
+          in: query
+          description: >-
+            Customer assigned reference to the transaction. Either endToEndId or
+            firmRootId is required
+          required: false
+          schema:
+            type: string
+        - name: firmRootId
+          in: query
+          description: >-
+            Unique identification, as assigned by the first instructing agent or
+            initiatingParty, to unambiguously identify the transaction that is
+            passed on, unchanged, throughout the entire interbank chain. Either
+            firmRootId or endToEndId is required.
+          required: false
+          schema:
+            type: string
+      x-examples:
+        - name: Status retrieval - firmRootId
+          description: Retrieve payment status using firmRootId
+          parameters:
+            firmRootId: 596c0f34-7d7a-4f9b-b6f8-91704a63828a
+        - name: Status retrieval - endToEndId
+          description: Retrieve payment status using endToEndId
+          parameters:
+            endToEndId: UK20210920231137440
+      responses:
+        '200':
+          description: >-
+            Response to the status inquiry
+
+
+            List of Error codes and Rule definitions. errorDescription is
+            dynamically generated hence not shown here.
+
+
+            10001 - Mandatory field is missing or invalid
+
+            10002 - Minimum length validation failure
+
+            10003 - Maximum length validation failure
+
+            10004 - Date validation failure
+
+            10005 - Amount validation failure ~ value more than maximum
+
+            10006 - Amount validation failure ~ value less than minimum
+
+            10007 - Amount validation failure ~ value is not a number
+
+            10008 - Validation failure ~ unexpected value provided
+
+            10009 - Invalid Id provided
+
+            10010 - Personal information validation failure
+
+            11000 - Clearing/Regulatory failure
+
+            12000 - System Error
+
+            13000 - Uncategorized Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/paymentStatus'
+        '400':
+          description: |-
+            Bad Request
+            GCA-095 - endToEndId or firmRootId is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+        '403':
+          description: |-
+            Forbidden.
+            GCA-001 - Client is not eligible for the API Service
+            GCA-003 - Client is not eligible for the API Service
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+        '503':
+          description: |-
+            Service Unavailable.
+            GCA-030 - API Processing Error
+            GCA-099 - System Unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+      tags:
+        - Payment Information Retrieval
+components:
+  schemas:
+    payments:
+      type: object
+      required:
+        - requestedExecutionDate
+        - paymentIdentifiers
+        - paymentAmount
+        - paymentCurrency
+        - debtor
+        - debtorAgent
+        - creditor
+        - creditorAgent
+        - transferType
+      properties:
+        possibleDuplicateMessage:
+          type: boolean
+          description: Optional field to indicate a duplicate payment
+        requestedExecutionDate:
+          type: string
+          pattern: '[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])'
+          maxLength: 10
+          description: >-
+            Requested date on which/by which the transaction should be executed
+            (by Debtor FI). ISO Date format. (YYYY-MM-DD)
+        paymentIdentifiers:
+          $ref: '#/components/schemas/paymentIdentifiers'
+        paymentCurrency:
+          type: string
+          maxLength: 3
+          description: 3- character ISO currency code. E.g. SGD, GBP, AUD, EUR, MXN, CLP
+        paymentAmount:
+          type: number
+          description: >-
+            Amount should be more than 0.01 with maximum of two decimal places
+            allowed
+
+            Maximum amount allowed per market/instrument :-
+
+            UK FPS - ? 1,000,000
+
+            SEPA Instant  - EUR 100,000
+          example: 1000
+        paymentType:
+          type: string
+          enum:
+            - ACH.TRF
+            - RTP
+            - BLOCKCHAIN
+          description: |-
+            Mandatory for RTP, ACH and Coin payments.
+            Specify the instrument type. 
+
+            Use RTP for Faster Payments
+
+            ACH.TRF for Chile ACH Payments
+
+            BLOCKCHAIN for Coin Payments
+        debtor:
+          $ref: '#/components/schemas/debtor'
+        debtorAgent:
+          $ref: '#/components/schemas/debtorAgent'
+        creditorAgent:
+          $ref: '#/components/schemas/creditorAgent'
+        creditor:
+          $ref: '#/components/schemas/creditor'
+        transferType:
+          type: string
+          enum:
+            - CREDIT
+            - DEBIT
+          description: >-
+            To indicate the transaction is a credit transfer or direct debit
+            transfer. This indicator also determines the originator and receiver
+            is the debit and credit side of this transaction. 
+
+            Supported value per market/instrument :-
+
+            UK Faster Payments - CREDIT
+
+            Singapore Faster Payments - CREDIT
+
+            Australia Faster Payments - CREDIT
+
+            Singapore Faster Payments - CREDIT
+
+            Hong Kong Faster Payments - CREDIT
+
+            Malaysia Faster Payments - CREDIT
+
+            SEPA Instant - CREDIT
+
+            Indonesia RTP - CREDIT
+
+            Brzil RTP - CREDIT
+
+            US RTP - CREDIT
+
+            Push To Card - CREDIT
+
+            ACH Chile Low Value - CREDIT
+
+            Blockchain (coin) Payments - CREDIT
+        purpose:
+          $ref: '#/components/schemas/purpose'
+        categoryPurpose:
+          $ref: '#/components/schemas/categoryPurpose'
+        remittanceInformation:
+          $ref: '#/components/schemas/remittanceInformation'
+        taxInformation:
+          $ref: '#/components/schemas/taxInformation'
+        secureVerification:
+          type: array
+          description: Applies only for Interac proxy payments
+          items:
+            $ref: '#/components/schemas/secureVerification'
+        paymentExpiryDate:
+          type: string
+          format: date-time
+          description: >-
+            Applies  to Interac proxy Payments and Zelle payments. Format
+            expected - YYYY-MM-DDThh:mm:ss+/-time offset to UTC
+        chargeBearer:
+          type: string
+          enum:
+            - CREDITOR
+            - DEBTOR
+          description: Only applicable for Indonesia Faster Payments
+    secureVerification:
+      type: object
+      description: Only applicable for Interac payments
+      properties:
+        key:
+          type: string
+          description: Key identifies the security question
+        secret:
+          type: string
+          description: Authenticate the key using secret answer to the question
+    taxInformation:
+      type: object
+      description: |-
+        mandatory for Brazil PIX and Chile Low value ACH payments
+        Optional for Mexico RTP
+      properties:
+        taxAmount:
+          type: number
+          description: Applicable only for Mexico RTP
+          example: 1000
+        creditorTaxInformation:
+          type: object
+          properties:
+            taxId:
+              type: string
+              description: |-
+                Maximum lengths allowed per instrument/market :-
+                ACH Chile - 35
+            taxpayerCategory:
+              type: string
+              enum:
+                - INDIVIDUAL
+                - CORPORATE
+          required:
+            - taxId
+            - taxpayerCategory
+    Details:
+      type: object
+      properties:
+        tp:
+          $ref: '#/components/schemas/Max10Text'
+        date:
+          type: string
+          pattern: '[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])'
+        country:
+          type: string
+          maxLength: 2
+        code:
+          $ref: '#/components/schemas/Max10Text'
+        amount:
+          type: number
+          example: 1000
+        additionalInfo:
+          $ref: '#/components/schemas/Max35Text'
+    Max35Text:
+      type: string
+    Max10Text:
+      type: string
+    dateAndPlaceOfBirth:
+      type: object
+      properties:
+        birthDate:
+          type: string
+          pattern: '[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])'
+        cityOfBirth:
+          type: string
+          maxLength: 35
+        countryOfBirth:
+          type: string
+          maxLength: 2
+    Authority:
+      type: object
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+          maxLength: 2
+    instructionForCreditorAgent:
+      type: object
+      description: Not supported for UK and India Faster Payments
+      properties:
+        instructionCode:
+          type: string
+          description: >-
+            Instruction Code. For example<br>CHQB = Pay Creditor by cheque 
+            9<br>HOLD = Hold cash for Creditor<br>PHOB = Phone
+            Beneficiary<br>TELB = Please advise/contact creditor/claimant by the
+            most efficient means of telecommunication
+          maxLength: 10
+        instruction:
+          type: array
+          description: The Instruction text
+          items:
+            type: string
+            minLength: 1
+            maxLength: 35
+    callbacks:
+      type: array
+      description: >-
+        List of Error codes and Rule definitions. errorDescription is
+        dynamically generated hence not shown here.
+
+
+        10001 - Mandatory field is missing or invalid
+
+        10002 - Minimum length validation failure
+
+        10003 - Maximum length validation failure
+
+        10004 - Date validation failure
+
+        10005 - Amount validation failure ~ value more than maximum
+
+        10006 - Amount validation failure ~ value less than minimum
+
+        10007 - Amount validation failure ~ value is not a number
+
+        10008 - Validation failure ~ unexpected value provided
+
+        10009 - Invalid Id provided
+
+        10010 - Personal information validation failure
+
+        11000 - Clearing/Regulatory failure
+
+        12000 - System Error
+
+        13000 - Uncategorized Error
+      items:
+        type: object
+        properties:
+          endToEndId:
+            type: string
+          firmRootId:
+            type: string
+          createDateTime:
+            type: string
+          paymentStatus:
+            type: string
+            enum:
+              - PENDING
+              - PENDING_POSTING
+              - COMPLETED
+              - COMPLETED_CREDITED
+              - REJECTED
+              - RETURNED
+              - BLOCKED
+            description: >-
+              Status of the payment.
+
+              PENDING - Payment is pending processing
+
+              PENDING_POSTING - Payment is yet to be posted in the beneficiary
+              account
+
+              COMPLETED - Payment has successfully completed
+
+              COMPLETED_CREDITED - Status indicating the beneficiary's account
+              has been credited
+
+              REJECTED - Payment has been rejected. Please refer to the
+              exception object for error details
+
+              RETURNED - Payment has been retured to the debtor party
+
+              BLOCKED - Payment blocked due to sanctions issue 
+
+
+
+
+              RTP Flows (All Markets) - 
+
+              PENDING -> COMPLETED  
+
+              PENDING -> REJECTED
+
+
+              Additional Flows(RTP)-> 
+
+              US  - 
+
+              PENDING -> PENDING_POSTING -> COMPLETED
+
+              PENDING -> BLOCKED
+
+
+              Hong Kong - 
+
+              PENDING -> COMPLETED -> COMPLETED_CREDITED
+
+
+              AUSTRALIA, BRAZIL, INDONESIA, MALAYSIA, MEXICO, UK -
+
+              PENDING -> COMPLETED -> RETURNED
+
+
+              Push To Card Flows - 
+
+              PENDING -> COMPLETED
+
+              PENDING -> REJECTED
+
+              PENDING -> COMPLETED -> RETURNED
+
+
+              ACH Flows (Chile) - 
+
+              PENDING -> COMPLETED 
+
+              PENDING - REJECTED
+
+
+              Blockchain (Coin) Flows - 
+
+              PENDING -> PENDING_POSTING -> COMPLETED 
+
+              PENDING -> REJECTED
+          exceptions:
+            type: array
+            items:
+              type: object
+              properties:
+                errorCode:
+                  type: string
+                errorDescription:
+                  type: string
+                ruleDefinition:
+                  type: string
+                externalCode:
+                  type: string
+    paymentStatus:
+      type: object
+      properties:
+        createDateTime:
+          type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PENDING_POSTING
+            - COMPLETED
+            - COMPLETED_CREDITED
+            - REJECTED
+            - RETURNED
+            - BLOCKED
+          description: >-
+            Status of the payment.
+
+            PENDING - Payment is pending processing
+
+            PENDING_POSTING - Payment is yet to be posted in the beneficiary
+            account
+
+            COMPLETED - Payment has successfully completed
+
+            COMPLETED_CREDITED - Status indicating the beneficiary's account has
+            been credited
+
+            REJECTED - Payment has been rejected. Please refer to the exception
+            object for error details
+
+            RETURNED - Payment has been retured to the debtor party
+
+            BLOCKED - Payment blocked due to sanctions issue 
+
+
+
+            RTP Flows (All Markets) - 
+
+            PENDING -> COMPLETED  
+
+            PENDING -> REJECTED
+
+
+            Additional Flows(RTP)-> 
+
+            US  - 
+
+            PENDING -> PENDING_POSTING -> COMPLETED
+
+            PENDING -> BLOCKED
+
+
+            Hong Kong - 
+
+            PENDING -> COMPLETED -> COMPLETED_CREDITED
+
+
+            AUSTRALIA, BRAZIL, INDONESIA, MALAYSIA, MEXICO, UK -
+
+            PENDING -> COMPLETED -> RETURNED
+
+
+            Push To Card Flows - 
+
+            PENDING -> COMPLETED
+
+            PENDING -> REJECTED
+
+            PENDING -> COMPLETED -> RETURNED
+
+
+            Blockchain (Coin) Flows - 
+
+            PENDING -> PENDING_POSTING -> COMPLETED 
+
+            PENDING -> REJECTED
+        exception:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+              errorDescription:
+                type: string
+              ruleDefinition:
+                type: string
+              externalCode:
+                type: string
+    payment:
+      type: object
+      properties:
+        paymentStatus:
+          type: string
+        firmRootId:
+          type: string
+        possibleDuplicateMessage:
+          type: boolean
+        requestedExecutionDate:
+          type: string
+          pattern: '[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])'
+          maxLength: 10
+          description: >-
+            Requested date on which/by which the transaction should be executed
+            (by Debtor FI). ISO Date format. (YYYY-MM-DD)
+        paymentIdentifiers:
+          $ref: '#/components/schemas/paymentIdentifiers'
+        paymentCurrency:
+          type: string
+          maxLength: 3
+          description: 3- character ISO currency code. E.g. INR, GBP
+        paymentAmount:
+          type: number
+          description: >-
+            Amount should be more than 0.01 with maximum of two decimal places
+            allowed
+          example: 1000
+        debtor:
+          $ref: '#/components/schemas/debtor'
+        debtorAgent:
+          $ref: '#/components/schemas/debtorAgent'
+        creditorAgent:
+          $ref: '#/components/schemas/creditorAgent'
+        creditor:
+          $ref: '#/components/schemas/creditor'
+        transferType:
+          type: string
+          enum:
+            - CREDIT
+          description: >2-
+             This field is mandatory only for Singapore, Australia and Malaysia.
+            To indicate the transaction is a credit transfer or direct debit
+            transfer. This indicator also determines the originator and receiver
+            is the debit and credit side of this transaction. 
+        purpose:
+          $ref: '#/components/schemas/purpose'
+        categoryPurpose:
+          $ref: '#/components/schemas/categoryPurpose'
+        remittanceInformation:
+          $ref: '#/components/schemas/remittanceInformation'
+        exception:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+              errorDescription:
+                type: string
+              ruleDefinition:
+                type: string
+    cd:
+      type: string
+      description: service Level in coded form.
+    prtry:
+      type: string
+      description: freeform
+      maxLength: 35
+    postalAddress:
+      type: object
+      description: >-
+        Address of the party
+
+        For UK FPS it is recommended that the combined length of all structured
+        fields should be less than 140 characters
+
+        SEPA Instant - Only country and addressLine are applicable
+
+        Push To Card - Include buildingNumber and streetName
+      properties:
+        addressType:
+          type: string
+          enum:
+            - ADDR
+            - BIZZ
+            - DLVY
+            - HOME
+            - MLTO
+            - PBOX
+          description: >-
+            enum. Values are ADDR - Postal Address is the complete postal
+            address. BIZZ - Business Address is the business address. DLVY- 
+            DeliveryTo Address is the address to which delivery is to take
+            place. HOME - Residential Address is the home address. MLTO - MailTo
+            Address is the address to which mail is sent. PBOX-  PO Box Address
+            is a postal office (PO) box.
+        streetName:
+          type: string
+          description: |-
+            Name of street. Mandatory for US RTP
+            Maximum length applicable :-
+            Push To Card - 35
+          maxLength: 70
+        buildingNumber:
+          type: string
+          description: |-
+            Building name or number.
+            Maximum length applicable :-
+            Push To Card - 35
+          maxLength: 16
+        postalCode:
+          type: string
+          description: |-
+            Zip code. Mandatory for Wallet Payments and US RTP
+            Maximum length applicable :-
+            Push To Card - 9
+          maxLength: 16
+        townName:
+          type: string
+          description: |-
+            Name of the town. Mandatory for US RTP
+            Maximum length applicable :-
+            Push To Card - 25
+          maxLength: 35
+        countrySubDvsn:
+          type: string
+          maxLength: 35
+          description: Mandatory for US RTP
+        country:
+          type: string
+          description: |-
+            2 character ISO country code.
+            Mandatory for Wallet Payments, US RTP, and Interac
+          maxLength: 2
+        addressLine:
+          type: array
+          items:
+            type: string
+          description: |-
+            Not applicable to Wallet Payments. Free form text address lines Up
+            to 4 lines.
+
+
+            Maximum number of characters allowed per instrument/market :-
+
+            UK FPS - 4 lines, 140 characters including spaces 
+            SEPA Instant - 2 lines, 70 characters each including spaces 
+            Brazil RTP - 7 lines, 70 characters
+    partyId:
+      type: object
+      description: Identification information
+      properties:
+        privateId:
+          type: object
+          description: private Identification
+          properties:
+            dateAndPlaceOfBirth:
+              $ref: '#/components/schemas/dateAndPlaceOfBirth'
+        countryOfResidence:
+          $ref: '#/components/schemas/countryOfResidence'
+    contactDetails:
+      type: object
+      description: contact Details
+      properties:
+        namePrefix:
+          type: string
+          enum:
+            - DOCT
+            - MADM
+            - MISS
+            - MIST
+          description: >-
+            Specifies the terms used to formally address a person. Enum Values
+            are DOCT-  Doctor MADM - Madam MISS - Miss MIST - Mister
+        name:
+          type: string
+          description: >-
+            Name by which a party is known and which is usually used to identify
+            that party.
+          maxLength: 140
+        phoneNumber:
+          type: string
+          description: >-
+            Collection of information that identifies a phone number, as defined
+            by telecom services
+          maxLength: 35
+        mobileNumber:
+          type: string
+          description: >-
+            Collection of information that identifies a mobile phone number, as
+            defined by telecom services.
+          maxLength: 35
+        faxNumber:
+          type: string
+          description: >-
+            Collection of information that identifies a FAX number, as defined
+            by telecom services.
+          maxLength: 35
+        emailAddress:
+          type: string
+          description: Address for electronic mail (e-mail).
+          maxLength: 2048
+        otherContactDetails:
+          type: string
+          description: Contact details in another form.
+          maxLength: 35
+    accountType:
+      type: string
+      description: >-
+        Mandatory for SEPA Instant - Use IBAN
+
+        Mandatory for Blockchain Payments - DDA, BDA (Blockchain Deposit
+        Account)
+
+        Field not applicable to Alternate Payments (Wallet, Cards)
+      enum:
+        - DDA
+        - VAM
+        - IBAN
+        - BDA
+    accountCcy:
+      type: string
+      description: >-
+        Originator account currency. Field not applicable to Alternate Payments
+        (Wallet, Cards)
+
+        UK FPS - GBP only
+
+        SEPA Instant - EUR only 
+    proprietaryIdentification:
+      type: string
+      description: Name of the scheme, in a free text form.
+      maxLength: 70
+    acct_identification:
+      type: string
+      description: >-
+
+        Maximum length supported for each instrument and market :-
+
+        SEPA Instant - 8 (numeric only)
+
+
+        US RTP - 9 (Routing and Transit Number -> alphabetic characters may be
+        present)
+
+
+        Brazil RTP - 8 
+    otherId_party:
+      type: string
+      description: name of the party
+      maxLength: 35
+    name:
+      type: string
+      maxLength: 140
+    countryOfResidence:
+      type: string
+      description: >-
+        2 character ISO country code of residence. Mandatory for Interac
+        payments
+      maxLength: 2
+    possibleDuplicateMessage:
+      type: boolean
+      description: true or false
+    paymentInitiationResponse:
+      type: object
+      properties:
+        endToEndId:
+          $ref: '#/components/schemas/endToEndId'
+        firmRootId:
+          $ref: '#/components/schemas/firmRootId'
+    uprid:
+      type: string
+    endToEndId:
+      type: string
+    transactionId:
+      type: string
+    firmRootId:
+      type: string
+    ErrorsInit:
+      type: object
+      properties:
+        endToEndId:
+          type: string
+        errorDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/errorDetails'
+    errorDetails:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        errorDescription:
+          type: string
+        ruleDefinition:
+          type: string
+    error:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        errorDescription:
+          type: string
+    Errors:
+      type: object
+      properties:
+        errorDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/error'
+    proprietaryCode:
+      type: object
+      properties:
+        cd:
+          type: string
+          example: example
+          description: Coded form
+        prtry:
+          type: string
+          example: example
+    financialInstitutionIdReceiverAgent:
+      type: object
+      description: financial institution identifier
+      required:
+        - bic
+      properties:
+        bic:
+          type: string
+          description: SWIFT BIC
+          maxLength: 11
+    debtorFinancialInstitutionId:
+      type: object
+      description: Financial institution identifier of debtor
+      properties:
+        bic:
+          type: string
+          description: |-
+            Not applicable for US RTP 
+
+            Mandatory RTP markets:-
+            UK
+            India
+            Singapore
+            Australia
+            Malaysia
+            Hong Kong
+            SEPA Instant
+            Brazil
+            Mexico
+            Indonesia
+            Alternate Payments:-
+            Push To Card - US/Canada
+            Interac - Canada
+
+            ACH:- 
+            Chile
+
+            Mandatory Blockchain (Coin) Payment BICs:-
+            CHASUS33
+            CHASSGSG 
+            CHASHKHK
+            CHASGB2L
+            CHASLULX
+            CHASDEFX
+
+            Zelle Payments :- 
+            CHASUS33
+          enum:
+            - CHASGB2L
+            - CHASINBX
+            - CHASAU2X
+            - CHASSGSG
+            - CHASUS33
+            - CHASMYKX
+            - CHASHKHH
+            - CHASBRSP
+            - CHASDEFX
+            - CHASLULX
+            - CHASNL2X
+            - CHASIE4L
+            - CHASMXMX
+            - CHASCATT
+            - CHASIDJX
+            - CHASCLRM
+        clearingSystemId:
+          type: object
+          description: >-
+            Not applicable for UK, India, Singapore, Australia, Mexico,
+            Indonesia Faster Payments.
+
+            Mandatory for US RTP
+          properties:
+            id:
+              $ref: '#/components/schemas/acct_identification'
+            idType:
+              $ref: '#/components/schemas/idType'
+    creditorFinancialInstitutionId:
+      type: object
+      description: >-
+        Financial institution identifier of creditor
+
+
+        **For Mexico RTP use either bic or clearing system id for a bank
+        transfer use case. Length supported 8 or 11
+      properties:
+        bic:
+          type: string
+          description: |-
+            SWIFT BIC. Applicable and Mandatory for RTP markets :-
+            Singapore
+            Malaysia
+            Indonesia (For Pay to account only)
+
+            Optional markets :-
+            SEPA Instant
+            Mexico
+
+            Mandatory for Blockchain(Coin) Payments
+          maxLength: 12
+        clearingSystemId:
+          type: object
+          description: >-
+            Clearing system identifier. Applicable and Mandatory for
+            Faster/Real-time payment markets :-
+
+            UK
+
+            Australia
+
+            India
+
+            Hong Kong
+
+            US
+
+            Brazil
+
+
+            ACH :- 
+
+            Chile
+          properties:
+            id:
+              $ref: '#/components/schemas/acct_identification'
+            branchNumber:
+              type: string
+              description: >-
+                Branch of the bank. Applicable and Mandatory for Brazil Pix and
+                Chile ACH
+            idType:
+              $ref: '#/components/schemas/idType'
+          required:
+            - id
+      required:
+        - clearingSystemId
+    idType:
+      type: string
+      description: |-
+        Creditor Agent -
+        Applicable and optional for Low value ACH payments (Chile).
+        Applicable and mandatory for US RTP - USABA
+
+        Debtor Agent -
+        Applicable and mandatory for US RTP - USABA
+    accountId:
+      type: string
+      description: |-
+
+        Applicable and mandatory for RTP and Blockchain (Coin) Payments only
+
+        This field is to provide the regular account id when it is a pay by
+        Account instruction. if pay by proxy this does not need to be filled.
+
+
+        Maximum length supported for each instrument and market :-
+
+        UK FPS      - 8 (7 digit A/C numbers should be padded with a leading
+        zero) 
+        SGP RTP     - 35 
+        AUS RTP     - 35 
+        HKG FPS     - 35 
+        IND IMPS    - 35 
+        P2C US/CA   - 16  
+        BRA PIX     - 34  
+        MEX SPIE    - 16 
+        USA RTP     - 31 
+        Indonesia RTP - 35
+        SEPA Instant - 34 (IBAN) 
+        P2I INTERAC - 35
+        Blockchain (Coin) Payments - 34
+        Chile ACH - 34 
+    alternateAccountIdentifier:
+      type: string
+      description: |-
+        Alternate Account Identifier eg. email, program id, card number.
+
+        Mandatory for Push To Card :-
+        Use program id while specifying the debtor details
+        Use card number while specifying the creditor details
+    debtorAgent:
+      type: object
+      description: ''
+      properties:
+        financialInstitutionId:
+          $ref: '#/components/schemas/debtorFinancialInstitutionId'
+        additionalInstitutions:
+          type: array
+          description: >-
+
+            Only applicable to UK Faster Payments. Instructing agent of the
+            ultimate debtor. 
+          items:
+            $ref: '#/components/schemas/additionalInstitution'
+      required:
+        - financialInstitutionId
+    additionalInstitution:
+      type: object
+      description: >-
+        Only applicable to UK Faster Payments and Mexico RTP (foreign
+        remittances)
+      properties:
+        bic:
+          type: string
+        name:
+          type: string
+        isForeignParty:
+          type: boolean
+        postalAddress:
+          $ref: '#/components/schemas/postalAddress'
+    creditor:
+      type: object
+      properties:
+        creditorAccount:
+          type: object
+          oneOf:
+            - $ref: '#/components/schemas/accountId'
+            - $ref: '#/components/schemas/alternateAccountIdentifier'
+          properties:
+            accountType:
+              type: string
+              enum:
+                - ZELLE
+                - VENMO
+                - PAYPAL
+                - INTERAC
+                - CARD
+                - DDA
+                - LOAN
+                - ODFT
+                - NREX
+                - OTHER
+                - CACC
+                - SVGS
+                - TRAN
+                - CLABE
+                - VOSTRO
+                - IBAN
+                - BBAN
+                - DFLT
+                - SLRY
+                - BDA
+              description: |-
+
+                Mandatory for :
+                  1. Card Payments
+                  2. Venmo/Paypal wallets
+                  3. Interac 
+                  4. India IMPS
+                  5. Malaysia RTP 
+                  6. Brazil RTP (Pay to account only)
+                  7. Blockchain Payments 
+                  8. Chile ACH
+                  9. Zelle
+                  
+
+                Not supported for US RTP
+                  
+                India IMPS - 
+
+                LOAN - Loan account
+                ODFT - Overdraft
+                NREX - NonResidentExternal
+                OTHER - For Book and cross branch with VRN accounts
+                CACC - Cash Credit/Current account
+                DDA - DDA account
+                SVGS - Savings account
+
+                SEPA Instant - 
+                IBAN
+
+                Hong Kong RTP -
+                BBAN
+
+                Malaysia RTP - 
+                LOAN
+                DFLT
+                SVGS
+                CACC
+
+                Brazil RTP - 
+                CACC
+                SLRY
+                TRAN
+                SVGS
+
+                Mexico RTP - 
+                CLABE
+                VOSTRO
+                DDA
+
+
+                Indonesia RTP - 
+                EMAL 
+                ALIS 
+                MOBN 
+                CARD
+
+                Alternate Payments - 
+
+                VENMO - Push to wallet
+                PAYPAL - Push to wallet
+                INTERAC - Interac canada payments
+                CARD - Push to card payments
+                ZELLE - Zelle payments
+
+
+                Blockchain Payments - 
+                DDA
+                BDA - Blockchain Deposit Account
+            schemeName:
+              type: object
+              description: |-
+                Mandatory for pay by proxy -
+                RTP :- Singapore, Australia, Hong Kong, Malaysia, Brazil, Mexico
+                Alternate Payments :- Push To Wallet
+              properties:
+                proprietary:
+                  type: string
+                  enum:
+                    - MSIDN
+                    - NRIC
+                    - UEN
+                    - VPA
+                    - EMAL
+                    - ORGN
+                    - TELI
+                    - AUBN
+                    - PSPT
+                    - BREG
+                    - MBNO
+                    - ARMN
+                    - MOBN
+                    - SVID
+                    - CPF
+                    - CNPJ
+                    - EVP
+                    - QRCD
+                    - ACCN
+                    - ALIS
+                  description: >-
+                    Specifies the type of Proxy account. Mandatory if
+                    creditorAccount.alternateAccountIdentifier is present
+
+                    Proprietary types applicable per market and instrument:
+
+
+                    RTP - Singapore :-
+
+                    MSIDN - Mobile number 
+
+                    UEN - Unique Entity Number
+
+                    VPA - Virtual Payment Address
+
+                    NRIC - IC number 
+
+
+                    RTP - Australia :-
+
+                    EMAL - Email Address
+
+                    TELI - Telephone Number
+
+                    AUBN - Australia Business number
+
+                    ORGN - Organization Id
+
+
+                    RTP - Malaysia :-
+
+                    MBNO - Mobile number
+
+                    NRIC - IC number 
+
+                    PSPT - Passport number 
+
+                    ARMN - Army or Police Number 
+
+                    BREG - Business registration number
+
+
+                    RTP - Hong Kong :-
+
+                    EMAL - Email Address
+
+                    MOBN - Mobile Number (or fixed-line number)
+
+                    SVID - FPS Identifier
+
+
+                    RTP - Brazil :-
+
+                    CPF - Tax ID of Individual
+
+                    CNPJ - Tax ID of Corporate
+
+                    EVP - Random Key
+
+                    QRCD - QR Code
+
+                    EMAL - Email id 
+
+                    MOBN - Mobile number 
+
+
+                    RTP - Mexico :-
+
+                    MOBN - Mobile number
+
+                    BANK - Transfer to a Bank identifier 
+
+                    CARD - Transfer to a debit card number
+
+
+                    RTP - Indonesia :-
+
+                    MOBN - Mobile number
+
+                    EMAL - Email id 
+
+                    CARD - Transfer to a debit card number   
+
+                    ALIS - eMoney transfer
+
+
+                    Alternate Payments - Wallet :-
+
+                    EMAL - Email Address
+
+                    TELI - Telephone Number
+
+                    ACCN - Alternate account number
+
+                    ALIS - Alias identification
+
+
+                    Zelle Payments :- 
+
+                    EMAL - Email Address
+
+                    TELI - Telephone Number     
+            cardExpiryDate:
+              type: string
+              description: Mandatory for Push to Card. Acceptable format - YYMM
+          required:
+            - accountId
+        creditorName:
+          type: string
+          description: >-
+            Mandatory for RTP Markets :- 
+
+
+            UK FPS 
+
+
+            SEPA Instant
+
+
+            US RTP
+
+
+            Singapore, Australia, Mexico, Hong Kong, Brazil, Indonesia Faster
+            Payments - mandatory for Pay to Account transactions.
+
+
+            Mandatory For Alternate Payments :- 
+
+            Push To Card - US, Canada
+
+
+            Mandatory for ACH Payments :-
+
+            Chile
+
+
+            Maximum length supported per instrument/market :-
+
+
+            UK FPS:      40  
+
+            SEPA Instant: 140
+
+            SGP FPS:     140   
+
+            AUS FPS:     140   
+
+            HKG FPS:     140   
+
+            IND IMPS:    140   
+
+            P2C US &amp; CA: 30   
+
+            MEX SPIE:    40
+
+            Indonesia RTP: 140
+
+            ACH Chile: 70
+        postalAddress:
+          $ref: '#/components/schemas/postalAddress'
+        dateAndPlaceOfBirth:
+          $ref: '#/components/schemas/dateAndPlaceOfBirth'
+        countryOfResidence:
+          $ref: '#/components/schemas/countryOfResidence'
+        ultimateCreditor:
+          $ref: '#/components/schemas/ultimateCreditor'
+        additionalCreditors:
+          type: array
+          items:
+            $ref: '#/components/schemas/additionalCreditor'
+      required:
+        - creditorName
+        - creditorAccount
+    additionalCreditor:
+      type: object
+      properties:
+        name:
+          type: string
+    creditorAgent:
+      type: object
+      description: |-
+        Not applicable for Push To Card, Push To Wallet and Interac
+        Mandatory for pay by account and optional for pay by proxy.
+        Mandatory for Mexico RTP if the creditor is a bank 
+      properties:
+        financialInstitutionId:
+          $ref: '#/components/schemas/creditorFinancialInstitutionId'
+        additionalInstitutions:
+          type: array
+          description: >-
+
+            Only applicable to UK Faster Payments. Instructing agent of the
+            ultimate debtor. 
+          items:
+            $ref: '#/components/schemas/additionalInstitution'
+      required:
+        - financialInstitutionId
+    debtor:
+      type: object
+      properties:
+        debtorAccount:
+          type: object
+          description: account details of the debtor party
+          properties:
+            accountType:
+              $ref: '#/components/schemas/accountType'
+            accountCurrency:
+              $ref: '#/components/schemas/accountCcy'
+          oneOf:
+            - $ref: '#/components/schemas/accountId'
+            - $ref: '#/components/schemas/alternateAccountIdentifier'
+        debtorName:
+          type: string
+          description: |-
+
+            Mandatory and Supported for :-
+
+            ACH Chile
+            Push To Card
+            US RTP
+            US FedNow
+            SARIE IPS
+            P2I Interac
+            Push To Wallet
+            Maximum length supported per instrument/market :-
+
+            US RTP: 140
+            P2C US &amp; CA: 30   
+            ACH Chile - 140
+        debtorDevice:
+          $ref: '#/components/schemas/debtorDevice'
+        ultimateDebtor:
+          $ref: '#/components/schemas/ultimateDebtor'
+      required:
+        - debtorAccount
+    paymentIdentifiers:
+      type: object
+      description: Payment Id
+      required:
+        - endToEndId
+      properties:
+        endToEndId:
+          type: string
+          description: |-
+            Customer assigned reference to the transaction.
+            Maximum length supported for each instrument and market :-
+            UK FPS  - 31 (letters and numbers only)
+            SGP RTP - 35 (letters and numbers only)
+            AUS RTP - 35 (letters and numbers only)
+            HKG FPS - 35 (letters and numbers only)
+            SEPA Instant - 35 (letters and numbers only)
+            Brazil RTP - 35 (letters and numbers only)
+            USA RTP - 31 (letters and numbers only)
+            Mexico RTP - 16 (letters and numbers only)
+            Indonesia RTP - 35 (letters and numbers only)
+            Push To Card - 16 (letters and numbers only)
+            ACH Chile - 35
+            Blockchain (coin) Payments - 16 (letters and numbers only)
+        otherPaymentReferences:
+          type: object
+          description: |-
+            The object becomes MANDATORY for below instrument &amp; market when
+            transferType = 'DEBIT' :-  Maximum length supported for each
+            instrument and market :-     
+            SGP RTP - 35 (letters and numbers only)
+            AUS RTP - 35 (letters and numbers only)
+          properties:
+            paymentReferenceValue:
+              type: string
+              description: Mandate id to be provided for Singapore direct debits
+    ultimateDebtor:
+      type: object
+      description: The ultimate party whose account is being debited or charged for
+      oneOf:
+        - $ref: '#/components/schemas/organizationId'
+        - $ref: '#/components/schemas/individualId'
+      properties:
+        ultimateDebtorName:
+          type: string
+          maxLength: 140
+          description: |-
+            Mandatory for US RTP
+            Maximum length supported :-
+            Push To Card  - 25
+        dateAndPlaceOfBirth:
+          $ref: '#/components/schemas/dateAndPlaceOfBirth'
+        countryOfResidence:
+          $ref: '#/components/schemas/countryOfResidence'
+        postalAddress:
+          type: object
+          $ref: '#/components/schemas/postalAddress'
+        additionalIdentifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/additionalIdentifier'
+    ultimateCreditor:
+      type: object
+      description: ultimate creditor party details
+      properties:
+        ultimateCreditorName:
+          type: string
+          maxLength: 140
+          description: Mandatory for US RTP &amp; US FedNow
+        dateAndPlaceOfBirth:
+          $ref: '#/components/schemas/dateAndPlaceOfBirth'
+        countryOfResidence:
+          $ref: '#/components/schemas/countryOfResidence'
+        postalAddress:
+          type: object
+          $ref: '#/components/schemas/postalAddress'
+      oneOf:
+        - $ref: '#/components/schemas/organizationId'
+        - $ref: '#/components/schemas/individualId'
+    purpose:
+      type: object
+      description: >-
+        This field is mandatory for Singapore Faster Payments and Chile ACH.
+        Underlying reason for the payment transaction, eg., a charity payment,
+        or  a commercial agreement between the creditor and the debtor. 
+
+        Not applicable for :-
+         UK FPS
+         Push To Card
+      properties:
+        code:
+          $ref: '#/components/schemas/cd'
+        type:
+          type: string
+          enum:
+            - CODE
+            - PROPRIETARY
+    categoryPurpose:
+      type: object
+      description: |-
+        Mandatory RTP markets :-
+
+        Hong Kong - Mandatory
+      properties:
+        code:
+          type: string
+          enum:
+            - SALA
+            - PENS
+            - TAXS
+            - SUPP
+          description: |-
+
+            Not applicable for Hong Kong 
+        proprietary:
+          type: string
+          enum:
+            - CXSALA
+            - CXBSNS
+            - CXMRCH
+            - CXTOPU
+            - WEALTH_TRANSFER
+            - INVESTMENT
+            - PURCHASE
+            - OTHER
+          description: |-
+
+            Coded form
+            Hong Kong RTP
+            For credit transfers -
+            "CXSALA" - Salary and Benefits Payment
+            "CXBSNS" - General Business Payment
+            "CXMRCH" - FPS Merchant Payment
+            "CXTOPU" - Account Top-up Payment
+
+            Indonesia RTP 
+            WEALTH_TRANSFER
+            INVESTMENT
+            PURCHASE
+            OTHER
+            CXSALA
+    remittanceInformation:
+      type: object
+      description: Mandatory for Malaysia Faster Payments, optional for other markets
+      properties:
+        unstructuredInformation:
+          type: array
+          description: >-
+            Maximum number of lines and characters supported per
+
+            market/instrument :-
+
+
+            UK FPS      - 1 line, 140 characters   
+
+            Singapore RTP     - 1 line, 140 characters   
+
+            Australia RTP     - 2 lines, 140 characters  
+
+            Hong Kong RTP     - 1 line, 140 characters   
+
+            SEPA Instant - 1 line, 140 characters
+
+            India IMPS    - 1 line, 140 characters   
+
+            Brazil RTP     - 1 line, 140 characters   
+
+            Mexico RTP    - 210 characters   
+
+            Indonesia RTP - 1 line, 140 characters
+
+            US RTP - 1 line, 140 charaters
+
+            Push To Card US &amp; CA - 1 line, 16 characters (Numbers,
+            alphabets, SPACE and special chars  -./,$@&amp; allowed)   
+
+            Blockchain (Coin) Payments - 1 line, 140 characters
+
+            Chile ACH - 2 lines, 35 characters total
+          items:
+            type: string
+        structuredInformation:
+          type: array
+          description: |-
+            Applicable Faster Payment Markets -
+            Malaysia
+            US
+          items:
+            $ref: '#/components/schemas/structuredInformation'
+        foreignCurrency:
+          $ref: '#/components/schemas/foreignCurrency'
+        fxRate:
+          $ref: '#/components/schemas/fxRate'
+    structuredInformation:
+      type: object
+      properties:
+        creditReference:
+          type: string
+          description: Unique reference to unambiguously refer to the payment transaction.
+          maxLength: 140
+        additionalRemittanceInformation:
+          type: string
+          description: |-
+            Applicable Faster Payment Markets -
+
+            Malaysia
+            Max length supported - 250 characters
+
+            US - mandatory if structuredInformation object is used            
+    foreignCurrency:
+      type: string
+      description: Only applicable for Mexico Faster Payments
+    fxRate:
+      type: string
+    paymentStatusEndpoint:
+      type: string
+      description: Endpoint to retrieve status of the initiated payment
+    debtorDevice:
+      type: object
+      description: Applicable and mandatory for Malaysia Faster Payments
+      properties:
+        ipAddress:
+          type: string
+    organizationId:
+      type: object
+      required:
+        - id
+      description: >-
+
+        Can be used when the underlying payer is a Legal Entity. It should be
+        used together with Ultimate Debtor Name and address, and it should
+        contain the payment account number of the underlying payer. In case the
+        transfer has not been initiated from a payment account, the value
+        populated should be a unique transaction identifier of the underlying
+        payer which permits the traceability of the transaction back to them.
+
+
+        Applicable markets and rules 
+
+
+        Can be used for ultimateDebtor and ultimateCreditor for the following
+
+
+        RTP markets :-
+          
+        SEPA 
+
+
+        Mexico 
+
+
+        UK
+
+
+        United States
+
+          ***Australia Faster Payments - Only to be used for ultimateCreditor.
+          For Australia Faster Payments, only id and schemeName.proprietary fields
+          are applicable
+          
+          
+        ACH markets :- 
+
+        Chile
+          
+          
+      properties:
+        id:
+          type: string
+          description: >-
+            For AU Superannuation payment (category payment), populate with USI
+            number for the Superannuation fund
+        bic:
+          type: string
+        issuer:
+          type: string
+        schemeName:
+          description: type of scheme
+          oneOf:
+            - $ref: '#/components/schemas/code'
+            - $ref: '#/components/schemas/proprietary'
+    code:
+      type: string
+    proprietary:
+      type: string
+      description: For AU Superannuation payment (category payment), populate "USI"
+    individualId:
+      type: object
+      description: >-
+
+        Can be used if organization ID is not populated, when the underlying
+        payer is an Individual. It should be used together with Ultimate Debtor
+        Name and address, and it should contain the payment account number of
+        the underlying payer. In case the transfer has not been initiated from a
+        payment account, the value populated should be a unique transaction
+        identifier of the underlying payer which permits the traceability of the
+        transaction back to them
+
+
+        applicable RTP markets :-
+
+        SEPA 
+
+
+        Mexico 
+
+
+        UK
+
+
+        United States
+
+
+        ACH markets :- 
+
+        Chile
+      properties:
+        id:
+          type: string
+        issuer:
+          type: string
+      required:
+        - id
+    additionalIdentifiers:
+      type: array
+      description: Applicable to Mexico RTP only
+      items:
+        $ref: '#/components/schemas/additionalIdentifier'
+    additionalIdentifier:
+      type: object
+      properties:
+        id:
+          type: string
+        idType:
+          type: string
+          enum:
+            - ORGANIZATION
+            - INDIVIDUAL
+        issuer:
+          type: string
+      required:
+        - idType
+        - id
+    paymentDetails:
+      allOf:
+        - $ref: '#/components/schemas/payments'
+        - type: object
+          properties:
+            paymentStatus:
+              $ref: '#/components/schemas/paymentStatus'
+            firmRootId:
+              $ref: '#/components/schemas/firmRootId'
