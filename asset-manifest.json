@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/pocket-money-chatgpt/static/css/main.b2aced45.css",
+    "main.js": "/pocket-money-chatgpt/static/js/main.7f42a3a6.js",
+    "static/media/logo.png": "/pocket-money-chatgpt/static/media/logo.76c76dc269cd367d9304.png",
+    "index.html": "/pocket-money-chatgpt/index.html",
+    "main.b2aced45.css.map": "/pocket-money-chatgpt/static/css/main.b2aced45.css.map",
+    "main.7f42a3a6.js.map": "/pocket-money-chatgpt/static/js/main.7f42a3a6.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b2aced45.css",
+    "static/js/main.7f42a3a6.js"
+  ]
+}
